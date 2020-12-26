@@ -2,8 +2,8 @@ package ru.mondayish.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.mondayish.models.AnimalRoot;
-import ru.mondayish.models.AnimalType;
+import ru.mondayish.models.tree.AnimalRoot;
+import ru.mondayish.models.tree.AnimalType;
 
 @RestController
 @RequestMapping("/tree/root")

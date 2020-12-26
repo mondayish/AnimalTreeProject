@@ -1,4 +1,4 @@
-package ru.mondayish.models;
+package ru.mondayish.models.node;
 
 import java.util.ArrayList;
 import java.util.List;
