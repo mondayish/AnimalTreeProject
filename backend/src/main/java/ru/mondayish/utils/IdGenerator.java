@@ -9,22 +9,22 @@ public class IdGenerator {
     private static long CONCRETE_ANIMAL_ID = 0;
 
     public static long getTypeId() {
-        return TYPE_ID++;
+        return ++TYPE_ID;
     }
 
     public static long getClassId() {
-        return CLASS_ID++;
+        return ++CLASS_ID;
     }
 
     public static long getSquadId() {
-        return SQUAD_ID++;
+        return ++SQUAD_ID;
     }
 
     public static long getFamilyId() {
-        return FAMILY_ID++;
+        return ++FAMILY_ID;
     }
 
     public static long getConcreteAnimalId() {
-        return CONCRETE_ANIMAL_ID++;
+        return ++CONCRETE_ANIMAL_ID;
     }
 }
