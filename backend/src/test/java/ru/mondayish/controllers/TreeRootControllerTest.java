@@ -9,7 +9,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @RunWith(SpringRunner.class)
@@ -23,11 +22,8 @@ public class TreeRootControllerTest {
     @Test
     public void getRoot() throws Exception {
         mockMvc.perform(get("/tree/root"))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.children").exists())
                 .andExpect(jsonPath("$.id").value(0));
     }
-
-
 }

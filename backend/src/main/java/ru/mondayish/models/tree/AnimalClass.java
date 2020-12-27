@@ -1,5 +1,6 @@
 package ru.mondayish.models.tree;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,6 +10,7 @@ import ru.mondayish.utils.IdGenerator;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class AnimalClass extends BasicNode {
 
     private long id;

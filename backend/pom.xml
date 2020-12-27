@@ -10,6 +10,7 @@
 
     <properties>
         <spring.boot.version>2.3.7.RELEASE</spring.boot.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>
@@ -37,7 +38,6 @@
             <artifactId>lombok</artifactId>
             <version>1.18.14</version>
         </dependency>
-
     </dependencies>
 
     <build>

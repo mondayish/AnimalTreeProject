@@ -40,6 +40,6 @@ public class BasicConcreteAnimalDAO implements AnimalNodesDAO<ConcreteAnimal> {
 
     @Override
     public void removeNode(long id, long parentId) throws IllegalArgumentException {
-        searchService.findAnimalSquadById(parentId).removeChild(id);
+        searchService.findAnimalFamilyById(parentId).removeChild(id);
     }
 }
