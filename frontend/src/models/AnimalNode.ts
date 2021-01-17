@@ -1,5 +1,6 @@
 export interface AnimalNode {
+    id: number,
     name: string;
-    population?: number;
+    numberOfKinds?: number;
     children?: AnimalNode[];
 }

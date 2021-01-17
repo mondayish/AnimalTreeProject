@@ -1,0 +1,15 @@
+.selected-node {
+    border: lime 3px solid;
+    border-radius: 6px;
+}
+
+.node:hover {
+    cursor: pointer;
+}
+
+.main-content {
+    background: antiquewhite;
+    height: 100%;
+    border: deeppink 7px solid;
+    border-radius: 30px;
+}
