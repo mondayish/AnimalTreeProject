@@ -1,6 +1,7 @@
 export interface FlatAnimalNode {
+    id: number;
     expandable: boolean;
-    name: string;
+    name?: string;
     level: number;
     numberOfKinds?: number
 }

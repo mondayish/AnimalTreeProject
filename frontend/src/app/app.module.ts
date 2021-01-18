@@ -8,6 +8,7 @@ import {HttpClientModule} from '@angular/common/http';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {CdkTreeModule} from '@angular/cdk/tree';
+import {MatInputModule} from '@angular/material/input';
 
 @NgModule({
     declarations: [
@@ -22,6 +23,7 @@ import {CdkTreeModule} from '@angular/cdk/tree';
         MatButtonModule,
         FormsModule,
         ReactiveFormsModule,
+        MatInputModule,
         CdkTreeModule
     ],
     providers: [],

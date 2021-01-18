@@ -3,16 +3,42 @@
     <div class="rounded bg-light m-3 text-center">
         <h4>Panel for editing tree</h4>
         <div *ngIf="selectedNode">
-            <span class="mr-5">Node name - {{selectedNode.name}}</span>
-            <span *ngIf="selectedNode.level<2">Number of species - {{selectedNode.numberOfKinds}}</span>
+            <span class="mr-5">Node name - {{selectedNode.name ? selectedNode.name : rootTitle}}</span>
+            <span *ngIf="isNodeHasKindsOfSpecies(selectedNode)">Number of species - {{selectedNode.numberOfKinds}}</span>
         </div>
         <div>
-            <button mat-raised-button class="btn-success mx-4 my-2">Add child</button>
-            <button mat-raised-button class="btn-info mx-4 my-2">Edit node</button>
-            <button mat-raised-button class="btn-danger mx-4 my-2">Delete node</button>
+            <button mat-raised-button class="mx-4 my-2" color="primary" [disabled]="!selectedNode || isNodeCantHasChild(selectedNode)">
+                Add child
+            </button>
+            <button mat-raised-button class="mx-4 my-2" color="accent" [disabled]="!selectedNode || isNodeRoot(selectedNode)">
+                Edit node
+            </button>
+            <button mat-raised-button class="mx-4 my-2" color="warn" [disabled]="!selectedNode || isNodeRoot(selectedNode)">
+                Delete node
+            </button>
+        </div>
+        <div *ngIf="isAddAction() || isEditAction()">
+            <form [formGroup]="actionForm">
+                <mat-form-field>
+                    <mat-label>Name</mat-label>
+                    <input formControlName="name" name="name" matInput [(ngModel)]="actionNode.name">
+                </mat-form-field>
+                <mat-form-field *ngIf="">
+                    <mat-label>Number of kinds</mat-label>
+                    <input formControlName="numberOfKinds" name="numberOfKinds" matInput [(ngModel)]="actionNode.numberOfKinds">
+                </mat-form-field>
+            </form>
+        </div>
+
+        <div *ngIf="isEditAction()">
+
+        </div>
+
+        <div *ngIf="isDeleteAction()">
+
         </div>
     </div>
-    <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+    <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="tree">
         <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
             <button *ngIf="node.expandable" class="bg-warning" mat-icon-button matTreeNodeToggle
                     [attr.aria-label]="'Toggle ' + node.name">
@@ -23,7 +49,7 @@
             <button *ngIf="!node.expandable" mat-icon-button disabled></button>
             <span class="ml-2 p-2 node" [ngClass]="{'selected-node': selectedNode === node}"
                   (click)="onNodeClick(node)">
-                    {{node.name}} {{node.numberOfKinds ? node.numberOfKinds : ""}}
+                    {{node.name ? node.name : rootTitle}} {{node.numberOfKinds ? node.numberOfKinds : ""}}
             </span>
         </mat-tree-node>
     </mat-tree>
