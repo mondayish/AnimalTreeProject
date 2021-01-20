@@ -4,10 +4,8 @@ import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import {AnimalNode} from '../models/AnimalNode';
 import {FlatAnimalNode} from '../models/FlatAnimalNode';
 import {Action} from '../models/Action';
-import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {resolveTxt} from 'dns';
-
-const TREE_HIERARCHY = ['root', 'type', 'class', 'squad', 'family', 'animal'];
+import {FormControl, FormGroup, ValidationErrors, Validators} from '@angular/forms';
+import {Level} from '../models/Level';
 
 const TREE_DATA: AnimalNode[] = [
     {
@@ -61,6 +59,15 @@ const TREE_DATA: AnimalNode[] = [
 
 export class AppComponent {
 
+    static NAMES_BY_LEVEL: Map<Level, string> = new Map([
+        [Level.ROOT, 'root'],
+        [Level.TYPE, 'type'],
+        [Level.CLASS, 'class'],
+        [Level.SQUAD, 'squad'],
+        [Level.FAMILY, 'family'],
+        [Level.CONCRETE_ANIMAL, 'animal'],
+    ]);
+
     private transformer(node: AnimalNode, level: number) {
         return {
             id: node.id,
@@ -91,22 +98,24 @@ export class AppComponent {
     }
 
     onNodeClick(node: FlatAnimalNode): void {
+        this.action = Action.NONE;
+        this.resetForm();
         this.selectedNode = node;
     }
 
     // only animal types and classes have this property
     isNodeHasKindsOfSpecies(node: FlatAnimalNode): boolean {
-        return node.level < 3 && node.level > 0;
+        return node.level === Level.TYPE || node.level === Level.CLASS;
     }
 
     // concreteAnimal can't has a child
     isNodeCantHasChild(node: FlatAnimalNode): boolean {
-        return node.level > 4;
+        return node.level === Level.CONCRETE_ANIMAL;
     }
 
     // if node hasn't name it's root node
     isNodeRoot(node: FlatAnimalNode): boolean {
-        return node.name === undefined;
+        return node.level === Level.ROOT;
     }
 
     isAddAction(): boolean {
@@ -121,7 +130,42 @@ export class AppComponent {
         return this.action === Action.DELETE;
     }
 
-    isActionNodeWithoutNumber(): boolean {
-        return this.isAddAction() && this.selectedNode.level > 0 || this.isEditAction() && this.selectedNode.level > 1;
+    onAddClick(): void {
+        this.action = Action.ADD;
+    }
+
+    onEditClick(): void {
+        this.action = Action.EDIT;
+    }
+
+    onDeleteClick(): void {
+        this.action = Action.DELETE;
+    }
+
+    fieldErrors(field: string): ValidationErrors | null {
+        const fieldState = this.actionForm.controls[field];
+        return fieldState.dirty && fieldState.errors ? fieldState.errors : null;
+    }
+
+    hasFormErrors(): boolean {
+        return this.actionForm.invalid;
+    }
+
+    onCancelClick(): void {
+        this.resetForm();
+        this.action = Action.NONE;
+    }
+
+    onFormSubmit(): void {
+        this.resetForm();
+    }
+
+    isActionNodeWithNumber(): boolean {
+        return this.isAddAction() && (this.selectedNode.level === Level.ROOT || this.selectedNode.level === Level.TYPE)
+            || this.isEditAction() && this.isNodeHasKindsOfSpecies(this.selectedNode);
+    }
+
+    private resetForm(): void {
+        this.actionForm.reset();
     }
 }

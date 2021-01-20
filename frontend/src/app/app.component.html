@@ -7,35 +7,51 @@
             <span *ngIf="isNodeHasKindsOfSpecies(selectedNode)">Number of species - {{selectedNode.numberOfKinds}}</span>
         </div>
         <div>
-            <button mat-raised-button class="mx-4 my-2" color="primary" [disabled]="!selectedNode || isNodeCantHasChild(selectedNode)">
+            <button mat-raised-button (click)="onAddClick()" class="mx-4 my-2" color="primary"
+                    [disabled]="!selectedNode || isNodeCantHasChild(selectedNode)">
                 Add child
             </button>
-            <button mat-raised-button class="mx-4 my-2" color="accent" [disabled]="!selectedNode || isNodeRoot(selectedNode)">
+            <button mat-raised-button (click)="onEditClick()" class="mx-4 my-2" color="accent"
+                    [disabled]="!selectedNode || isNodeRoot(selectedNode)">
                 Edit node
             </button>
-            <button mat-raised-button class="mx-4 my-2" color="warn" [disabled]="!selectedNode || isNodeRoot(selectedNode)">
+            <button mat-raised-button (click)="onDeleteClick()" class="mx-4 my-2" color="warn"
+                    [disabled]="!selectedNode || isNodeRoot(selectedNode)">
                 Delete node
             </button>
         </div>
         <div *ngIf="isAddAction() || isEditAction()">
             <form [formGroup]="actionForm">
-                <mat-form-field>
-                    <mat-label>Name</mat-label>
-                    <input formControlName="name" name="name" matInput [(ngModel)]="actionNode.name">
-                </mat-form-field>
-                <mat-form-field *ngIf="">
-                    <mat-label>Number of kinds</mat-label>
-                    <input formControlName="numberOfKinds" name="numberOfKinds" matInput [(ngModel)]="actionNode.numberOfKinds">
-                </mat-form-field>
+
+                <div>
+                    <mat-form-field>
+                        <mat-label>Name</mat-label>
+                        <input formControlName="name" name="name" matInput [(ngModel)]="actionNode.name">
+                    </mat-form-field>
+                    <div class="p-message-error text-danger mb-3" *ngIf="fieldErrors('name')">
+                        <span *ngIf="fieldErrors('name').required">Name is required</span>
+                        <span *ngIf="fieldErrors('name').minlength || fieldErrors('name').maxlength">Name length must be in [3..20]</span>
+                    </div>
+                </div>
+
+                <div>
+                    <mat-form-field *ngIf="isActionNodeWithNumber()">
+                        <mat-label>Number of kinds</mat-label>
+                        <input type="number" formControlName="numberOfKinds" name="numberOfKinds" matInput
+                               [(ngModel)]="actionNode.numberOfKinds">
+                    </mat-form-field>
+                    <div class="p-message-error text-danger mb-3" *ngIf="fieldErrors('numberOfKinds')">
+                        <span *ngIf="fieldErrors('numberOfKinds').required">Number of kinds is required</span>
+                        <span *ngIf="fieldErrors('numberOfKinds').min">Number of kinds must be bigger than 0</span>
+                    </div>
+                </div>
+
             </form>
-        </div>
-
-        <div *ngIf="isEditAction()">
-
-        </div>
-
-        <div *ngIf="isDeleteAction()">
-
+            <div>
+                <button mat-button class="btn-success" [disabled]="hasFormErrors()"
+                        (click)="onFormSubmit()">{{isAddAction() ? 'Add' : 'Edit'}}</button>
+                <button mat-button class="btn-danger" (click)="onCancelClick()">Cancel</button>
+            </div>
         </div>
     </div>
     <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="tree">
