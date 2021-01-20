@@ -3,14 +3,13 @@ import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {Level} from '../models/Level';
 import {AnimalNode} from '../models/AnimalNode';
-import {FlatAnimalNode} from '../models/FlatAnimalNode';
 
 @Injectable({
     providedIn: 'root'
 })
 export class AnimalTreeService {
 
-    private static readonly TREE_URL: string = 'http://localhost:8080/tree/';
+    private static readonly TREE_URL: string = '/tree/';
     private static readonly NAMES_BY_LEVEL: Map<Level, string> = new Map([
         [Level.ROOT, 'root'],
         [Level.TYPE, 'type'],
