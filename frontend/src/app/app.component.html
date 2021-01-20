@@ -3,7 +3,7 @@
     <div class="rounded bg-light m-3 text-center">
         <h4>Panel for editing tree</h4>
         <div *ngIf="selectedNode">
-            <span class="mr-5">Node name - {{selectedNode.name ? selectedNode.name : rootTitle}}</span>
+            <span class="mr-5">Node name - {{!isNodeRoot(selectedNode) ? selectedNode.name : rootTitle}}</span>
             <span *ngIf="isNodeHasKindsOfSpecies(selectedNode)">Number of species - {{selectedNode.numberOfKinds}}</span>
         </div>
         <div>

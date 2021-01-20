@@ -5,7 +5,7 @@ import java.util.List;
 
 public abstract class BasicNode implements Node {
 
-    private final List<Node> children = new ArrayList<>();
+    private List<Node> children = new ArrayList<>();
 
     @Override
     public void addChild(Node child) {
@@ -25,5 +25,10 @@ public abstract class BasicNode implements Node {
     @Override
     public long getId() {
         return 0;
+    }
+
+    @Override
+    public void setChildren(List<Node> children) {
+        this.children = new ArrayList<>(children);
     }
 }

@@ -7,6 +7,8 @@ import ru.mondayish.models.node.Node;
 import ru.mondayish.services.search.RootSearchService;
 import ru.mondayish.utils.IdGenerator;
 
+import java.util.Optional;
+
 @Service
 public class BasicAnimalClassDAO implements AnimalNodesDAO<AnimalClass> {
 
@@ -28,14 +30,7 @@ public class BasicAnimalClassDAO implements AnimalNodesDAO<AnimalClass> {
     @Override
     public void editNode(AnimalClass animalClass, long parentId) throws IllegalArgumentException {
         Node parent = searchService.findAnimalTypeById(parentId);
-        boolean isCorrectId = parent
-                .getChildren()
-                .stream()
-                .anyMatch(child -> child.getId() == animalClass.getId());
-        if (isCorrectId) {
-            parent.removeChild(animalClass.getId());
-            parent.addChild(animalClass);
-        }
+        NodeHelpService.editNodeWithoutChildren(parent, animalClass);
     }
 
     @Override

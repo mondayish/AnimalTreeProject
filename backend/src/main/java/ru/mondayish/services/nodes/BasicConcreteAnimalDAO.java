@@ -2,8 +2,8 @@ package ru.mondayish.services.nodes;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.mondayish.models.tree.ConcreteAnimal;
 import ru.mondayish.models.node.Node;
+import ru.mondayish.models.tree.ConcreteAnimal;
 import ru.mondayish.services.search.RootSearchService;
 import ru.mondayish.utils.IdGenerator;
 
@@ -28,14 +28,7 @@ public class BasicConcreteAnimalDAO implements AnimalNodesDAO<ConcreteAnimal> {
     @Override
     public void editNode(ConcreteAnimal concreteAnimal, long parentId) throws IllegalArgumentException {
         Node parent = searchService.findAnimalFamilyById(parentId);
-        boolean isCorrectId = parent
-                .getChildren()
-                .stream()
-                .anyMatch(child -> child.getId() == concreteAnimal.getId());
-        if (isCorrectId) {
-            parent.removeChild(concreteAnimal.getId());
-            parent.addChild(concreteAnimal);
-        }
+        NodeHelpService.editNodeWithoutChildren(parent, concreteAnimal);
     }
 
     @Override

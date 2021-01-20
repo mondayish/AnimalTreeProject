@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.mondayish.models.tree.AnimalRoot;
 import ru.mondayish.models.tree.AnimalType;
+import ru.mondayish.services.nodes.NodeHelpService;
 import ru.mondayish.utils.IdGenerator;
 
 @Service
@@ -25,15 +26,7 @@ public class BasicAnimalTypeDAO implements AnimalRootDAO<AnimalType> {
 
     @Override
     public boolean editNode(AnimalType node) {
-        boolean isCorrectId = animalRoot
-                .getChildren()
-                .stream()
-                .anyMatch(child -> child.getId() == node.getId());
-        if (isCorrectId) {
-            animalRoot.removeChild(node.getId());
-            animalRoot.addChild(node);
-        }
-        return isCorrectId;
+        return NodeHelpService.editNodeWithoutChildren(animalRoot, node);
     }
 
     @Override

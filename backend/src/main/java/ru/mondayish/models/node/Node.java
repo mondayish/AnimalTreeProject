@@ -11,4 +11,6 @@ public interface Node {
     void removeChild(long id);
 
     List<Node> getChildren();
+
+    void setChildren(List<Node> children);
 }

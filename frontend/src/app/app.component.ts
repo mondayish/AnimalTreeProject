@@ -6,6 +6,7 @@ import {FlatAnimalNode} from '../models/FlatAnimalNode';
 import {Action} from '../models/Action';
 import {FormControl, FormGroup, ValidationErrors, Validators} from '@angular/forms';
 import {Level} from '../models/Level';
+import {AnimalTreeService} from '../services/animal-tree.service';
 
 const TREE_DATA: AnimalNode[] = [
     {
@@ -59,15 +60,6 @@ const TREE_DATA: AnimalNode[] = [
 
 export class AppComponent {
 
-    static NAMES_BY_LEVEL: Map<Level, string> = new Map([
-        [Level.ROOT, 'root'],
-        [Level.TYPE, 'type'],
-        [Level.CLASS, 'class'],
-        [Level.SQUAD, 'squad'],
-        [Level.FAMILY, 'family'],
-        [Level.CONCRETE_ANIMAL, 'animal'],
-    ]);
-
     private transformer(node: AnimalNode, level: number) {
         return {
             id: node.id,
@@ -79,7 +71,7 @@ export class AppComponent {
     }
 
     rootTitle: string = 'Animals';
-    actionNode: AnimalNode = {id: 0, name: '', numberOfKinds: 0};
+    actionNode: AnimalNode;
     actionForm: FormGroup = new FormGroup({
         name: new FormControl('',
             [Validators.required, Validators.minLength(3), Validators.maxLength(20)]),
@@ -93,8 +85,8 @@ export class AppComponent {
         this.transformer, node => node.level, node => node.expandable, node => node.children);
     dataSource: MatTreeFlatDataSource<AnimalNode, FlatAnimalNode> = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
 
-    constructor() {
-        this.dataSource.data = TREE_DATA;
+    constructor(private animalTreeService: AnimalTreeService) {
+        this.loadTree();
     }
 
     onNodeClick(node: FlatAnimalNode): void {
@@ -131,10 +123,12 @@ export class AppComponent {
     }
 
     onAddClick(): void {
+        this.actionNode = {id: 0, name: this.selectedNode.name, numberOfKinds: this.selectedNode.numberOfKinds};
         this.action = Action.ADD;
     }
 
     onEditClick(): void {
+        this.actionNode = {id: this.selectedNode.id, name: this.selectedNode.name, numberOfKinds: this.selectedNode.numberOfKinds};
         this.action = Action.EDIT;
     }
 
@@ -163,6 +157,13 @@ export class AppComponent {
     isActionNodeWithNumber(): boolean {
         return this.isAddAction() && (this.selectedNode.level === Level.ROOT || this.selectedNode.level === Level.TYPE)
             || this.isEditAction() && this.isNodeHasKindsOfSpecies(this.selectedNode);
+    }
+
+    private loadTree(): void {
+        this.animalTreeService.getTree()
+            .subscribe((data: AnimalNode) => {
+                this.dataSource.data = [data];
+            });
     }
 
     private resetForm(): void {
