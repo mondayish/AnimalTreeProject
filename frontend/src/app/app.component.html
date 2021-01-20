@@ -48,12 +48,13 @@
 
             </form>
             <div>
-                <button mat-button class="btn-success" [disabled]="hasFormErrors()"
-                        (click)="onFormSubmit()">{{isAddAction() ? 'Add' : 'Edit'}}</button>
+                <button mat-button class="btn-success" [disabled]="hasFormErrors() && !isNumberFieldDisabledAndNameIsOk()"
+                        (click)="isAddAction() ? onFormAddClick() : onFormEditClick()">{{isAddAction() ? 'Add' : 'Edit'}}</button>
                 <button mat-button class="btn-danger" (click)="onCancelClick()">Cancel</button>
             </div>
         </div>
     </div>
+
     <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="tree">
         <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
             <button *ngIf="node.expandable" class="bg-warning" mat-icon-button matTreeNodeToggle
@@ -69,4 +70,5 @@
             </span>
         </mat-tree-node>
     </mat-tree>
+
 </div>

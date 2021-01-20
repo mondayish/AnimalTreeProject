@@ -28,7 +28,22 @@ export class AnimalTreeService {
         return this.httpClient.get(AnimalTreeService.TREE_URL + AnimalTreeService.NAMES_BY_LEVEL.get(Level.ROOT));
     }
 
-    addChild(node: AnimalNode, level: Level, parentId: number){
-        this.httpClient.post(node)
+    addNode(node: AnimalNode, level: Level, parentId: number): Observable<any> {
+        const url: string = AnimalTreeService.TREE_URL + (level === Level.TYPE ? AnimalTreeService.NAMES_BY_LEVEL.get(Level.TYPE) :
+            AnimalTreeService.NAMES_BY_LEVEL.get(level - 1) + '/' + parentId + '/' + AnimalTreeService.NAMES_BY_LEVEL.get(level));
+        return this.httpClient.post(url, node);
+    }
+
+    editNode(node: AnimalNode, level: Level, parentId: number): Observable<any> {
+        const url: string = AnimalTreeService.TREE_URL + (level === Level.TYPE ? AnimalTreeService.NAMES_BY_LEVEL.get(Level.TYPE) :
+            AnimalTreeService.NAMES_BY_LEVEL.get(level - 1) + '/' + parentId + '/' + AnimalTreeService.NAMES_BY_LEVEL.get(level));
+        return this.httpClient.put(url, node);
+    }
+
+    deleteNode(node: AnimalNode, level: Level, parentId: number): Observable<any> {
+        const url: string = AnimalTreeService.TREE_URL + (level === Level.TYPE ? AnimalTreeService.NAMES_BY_LEVEL.get(Level.TYPE) :
+            AnimalTreeService.NAMES_BY_LEVEL.get(level - 1) + '/' + parentId + '/' + AnimalTreeService.NAMES_BY_LEVEL.get(level))
+            + '/' + node.id;
+        return this.httpClient.delete(url);
     }
 }

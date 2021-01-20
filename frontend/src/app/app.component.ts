@@ -8,49 +8,6 @@ import {FormControl, FormGroup, ValidationErrors, Validators} from '@angular/for
 import {Level} from '../models/Level';
 import {AnimalTreeService} from '../services/animal-tree.service';
 
-const TREE_DATA: AnimalNode[] = [
-    {
-        id: 0,
-        children: [{
-            id: 1,
-            name: 'Spanches',
-            numberOfKinds: 20000,
-            children: [
-                {
-                    id: 1,
-                    name: 'Spiders',
-                    numberOfKinds: 10000,
-                    children: [
-                        {
-                            id: 1,
-                            name: 'Test1',
-                            children: [
-                                {
-                                    id: 1,
-                                    name: 'Test2',
-                                    children: [
-                                        {
-                                            id: 1,
-                                            name: 'Test3',
-                                            children: [
-                                                {
-                                                    id: 1,
-                                                    name: 'Test4',
-                                                    children: []
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        }]
-    }
-];
-
 
 @Component({
     selector: 'app-root',
@@ -118,12 +75,8 @@ export class AppComponent {
         return this.action === Action.EDIT;
     }
 
-    isDeleteAction(): boolean {
-        return this.action === Action.DELETE;
-    }
-
     onAddClick(): void {
-        this.actionNode = {id: 0, name: this.selectedNode.name, numberOfKinds: this.selectedNode.numberOfKinds};
+        this.actionNode = {id: 0, name: '', numberOfKinds: this.isActionNodeWithNumber() ? 0 : undefined};
         this.action = Action.ADD;
     }
 
@@ -133,7 +86,15 @@ export class AppComponent {
     }
 
     onDeleteClick(): void {
-        this.action = Action.DELETE;
+        const nodeToDelete: AnimalNode = {
+            id: this.selectedNode.id,
+            name: this.selectedNode.name,
+            numberOfKinds: this.selectedNode.numberOfKinds
+        };
+        const parentNode: FlatAnimalNode = this.getParent(this.selectedNode);
+        this.animalTreeService.deleteNode(nodeToDelete, this.selectedNode.level, parentNode.id)
+            .subscribe(() => this.loadTree());
+        this.action = Action.NONE;
     }
 
     fieldErrors(field: string): ValidationErrors | null {
@@ -141,8 +102,15 @@ export class AppComponent {
         return fieldState.dirty && fieldState.errors ? fieldState.errors : null;
     }
 
+    // because sometimes we need to check only first field
     hasFormErrors(): boolean {
         return this.actionForm.invalid;
+    }
+
+    // difficult to explain...
+    isNumberFieldDisabledAndNameIsOk(): boolean {
+        return !this.isActionNodeWithNumber() && !this.fieldErrors('name')
+            && (this.actionForm.controls['name'].dirty || this.action === Action.EDIT);
     }
 
     onCancelClick(): void {
@@ -150,7 +118,18 @@ export class AppComponent {
         this.action = Action.NONE;
     }
 
-    onFormSubmit(): void {
+    onFormAddClick(): void {
+        this.animalTreeService.addNode(this.actionNode, this.selectedNode.level + 1, this.selectedNode.id)
+            .subscribe(() => this.loadTree());
+        this.action = Action.NONE;
+        this.resetForm();
+    }
+
+    onFormEditClick(): void {
+        const parentNode: FlatAnimalNode = this.getParent(this.selectedNode);
+        this.animalTreeService.editNode(this.actionNode, this.selectedNode.level, parentNode.id)
+            .subscribe(() => this.loadTree());
+        this.action = Action.NONE;
         this.resetForm();
     }
 
@@ -159,10 +138,25 @@ export class AppComponent {
             || this.isEditAction() && this.isNodeHasKindsOfSpecies(this.selectedNode);
     }
 
+    private getParent(node: FlatAnimalNode): FlatAnimalNode | null {
+        const currentLevel = node.level;
+        if (currentLevel < 1) {
+            return null;
+        }
+        const startIndex = this.treeControl.dataNodes.indexOf(node) - 1;
+        for (let i = startIndex; i >= 0; i--) {
+            const currentNode = this.treeControl.dataNodes[i];
+            if (currentNode.level < currentLevel) {
+                return currentNode;
+            }
+        }
+    }
+
     private loadTree(): void {
         this.animalTreeService.getTree()
             .subscribe((data: AnimalNode) => {
                 this.dataSource.data = [data];
+                this.treeControl.expandAll();
             });
     }
 
