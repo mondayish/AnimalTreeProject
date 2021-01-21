@@ -44,6 +44,11 @@ export class AppComponent {
 
     constructor(private animalTreeService: AnimalTreeService) {
         this.loadTree();
+        const source = new EventSource('/tree/root/stream');
+        source.addEventListener('message', message => {
+            console.log(message);
+            this.dataSource.data = [JSON.parse(message.data)];
+        });
     }
 
     onNodeClick(node: FlatAnimalNode): void {
@@ -93,7 +98,7 @@ export class AppComponent {
         };
         const parentNode: FlatAnimalNode = this.getParent(this.selectedNode);
         this.animalTreeService.deleteNode(nodeToDelete, this.selectedNode.level, parentNode.id)
-            .subscribe(() => this.loadTree());
+            .subscribe((value) => this.loadTree(), (error) => console.log('Error after http request'));
         this.action = Action.NONE;
     }
 
@@ -120,7 +125,7 @@ export class AppComponent {
 
     onFormAddClick(): void {
         this.animalTreeService.addNode(this.actionNode, this.selectedNode.level + 1, this.selectedNode.id)
-            .subscribe(() => this.loadTree());
+            .subscribe((value) => this.loadTree(), (error) => console.log('Error after http request'));
         this.action = Action.NONE;
         this.resetForm();
     }
@@ -128,7 +133,7 @@ export class AppComponent {
     onFormEditClick(): void {
         const parentNode: FlatAnimalNode = this.getParent(this.selectedNode);
         this.animalTreeService.editNode(this.actionNode, this.selectedNode.level, parentNode.id)
-            .subscribe(() => this.loadTree());
+            .subscribe((value) => this.loadTree(), (error) => console.log('Error after http request'));
         this.action = Action.NONE;
         this.resetForm();
     }
