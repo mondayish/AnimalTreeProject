@@ -21,12 +21,15 @@ public class NotificationService {
     }
 
     public void sendNotification() {
+        List<SseEmitter> emittersToRemove = new ArrayList<>();
         emitters.forEach(emitter -> {
             try {
                 emitter.send(service.getAnimalRoot(), MediaType.APPLICATION_JSON);
             } catch (IOException e) {
-                e.printStackTrace();
+                emitter.complete();
+                emittersToRemove.add(emitter);
             }
         });
+        emitters.removeAll(emittersToRemove);
     }
 }

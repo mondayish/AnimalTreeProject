@@ -10,6 +10,7 @@ import {AnimalNode} from '../models/AnimalNode';
 export class AnimalTreeService {
 
     private static readonly TREE_URL: string = '/tree/';
+    private static readonly STREAM_URL: string = '/tree/root/stream';
     private static readonly NAMES_BY_LEVEL: Map<Level, string> = new Map([
         [Level.ROOT, 'root'],
         [Level.TYPE, 'type'],
@@ -44,5 +45,11 @@ export class AnimalTreeService {
             AnimalTreeService.NAMES_BY_LEVEL.get(level - 1) + '/' + parentId + '/' + AnimalTreeService.NAMES_BY_LEVEL.get(level))
             + '/' + node.id;
         return this.httpClient.delete(url);
+    }
+
+    subscribeOnEvents(onmessage: (message) => void, onerror: (error) => void) {
+        const source = new EventSource(AnimalTreeService.STREAM_URL);
+        source.addEventListener('message', onmessage);
+        source.addEventListener('error', onerror);
     }
 }

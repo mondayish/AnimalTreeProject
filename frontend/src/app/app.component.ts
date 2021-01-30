@@ -17,16 +17,6 @@ import {AnimalTreeService} from '../services/animal-tree.service';
 
 export class AppComponent {
 
-    private transformer(node: AnimalNode, level: number) {
-        return {
-            id: node.id,
-            expandable: !!node.children && node.children.length > 0,
-            name: node.name,
-            level: level,
-            numberOfKinds: node.numberOfKinds
-        };
-    }
-
     rootTitle: string = 'Animals';
     actionNode: AnimalNode;
     actionForm: FormGroup = new FormGroup({
@@ -44,11 +34,7 @@ export class AppComponent {
 
     constructor(private animalTreeService: AnimalTreeService) {
         this.loadTree();
-        const source = new EventSource('/tree/root/stream');
-        source.addEventListener('message', message => {
-            console.log(message);
-            this.dataSource.data = [JSON.parse(message.data)];
-        });
+        this.subscribeOnEvents();
     }
 
     onNodeClick(node: FlatAnimalNode): void {
@@ -98,7 +84,7 @@ export class AppComponent {
         };
         const parentNode: FlatAnimalNode = this.getParent(this.selectedNode);
         this.animalTreeService.deleteNode(nodeToDelete, this.selectedNode.level, parentNode.id)
-            .subscribe((value) => this.loadTree(), (error) => console.log('Error after http request'));
+            .subscribe(() => console.log('Delete successful'), () => console.log('Error after http request'));
         this.action = Action.NONE;
     }
 
@@ -125,7 +111,7 @@ export class AppComponent {
 
     onFormAddClick(): void {
         this.animalTreeService.addNode(this.actionNode, this.selectedNode.level + 1, this.selectedNode.id)
-            .subscribe((value) => this.loadTree(), (error) => console.log('Error after http request'));
+            .subscribe(() => console.log('Add successful'), () => console.log('Error after http request'));
         this.action = Action.NONE;
         this.resetForm();
     }
@@ -133,7 +119,7 @@ export class AppComponent {
     onFormEditClick(): void {
         const parentNode: FlatAnimalNode = this.getParent(this.selectedNode);
         this.animalTreeService.editNode(this.actionNode, this.selectedNode.level, parentNode.id)
-            .subscribe((value) => this.loadTree(), (error) => console.log('Error after http request'));
+            .subscribe(() => console.log('Edit successful'), () => console.log('Error after http request'));
         this.action = Action.NONE;
         this.resetForm();
     }
@@ -157,6 +143,16 @@ export class AppComponent {
         }
     }
 
+    private subscribeOnEvents(): void {
+        this.animalTreeService.subscribeOnEvents(
+            message => {
+                this.dataSource.data = [JSON.parse(message.data)];
+                this.treeControl.expandAll();
+            },
+            () => console.log('Server-sent emitter timeout ended. Refresh page to reconnect.')
+        );
+    }
+
     private loadTree(): void {
         this.animalTreeService.getTree()
             .subscribe((data: AnimalNode) => {
@@ -167,5 +163,15 @@ export class AppComponent {
 
     private resetForm(): void {
         this.actionForm.reset();
+    }
+
+    private transformer(node: AnimalNode, level: number) {
+        return {
+            id: node.id,
+            expandable: !!node.children && node.children.length > 0,
+            name: node.name,
+            level: level,
+            numberOfKinds: node.numberOfKinds
+        };
     }
 }

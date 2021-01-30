@@ -27,8 +27,9 @@ public class TreeRootController {
 
     @GetMapping("/stream")
     public SseEmitter getStream() {
-        SseEmitter sseEmitter = new SseEmitter();
+        SseEmitter sseEmitter = new SseEmitter(-1L);
         NotificationService.emitters.add(sseEmitter);
+        sseEmitter.onCompletion(() -> NotificationService.emitters.remove(sseEmitter));
         return sseEmitter;
     }
 }
