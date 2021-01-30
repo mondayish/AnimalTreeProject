@@ -20,7 +20,7 @@ public class NotificationInterceptor extends HandlerInterceptorAdapter {
     }
 
     @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) {
         System.out.println("From interceptor, method = " + request.getMethod());
         if (!request.getMethod().equals("GET") && request.getServletPath().contains("tree")) {
             notificationService.sendNotification();
