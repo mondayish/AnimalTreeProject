@@ -8,6 +8,7 @@ import {Notification} from '../models/Notification';
 import {FormControl, FormGroup, ValidationErrors, Validators} from '@angular/forms';
 import {Level} from '../models/Level';
 import {AnimalTreeService} from '../services/animal-tree.service';
+import {TreeUtil} from '../utils/tree-util';
 
 
 @Component({
@@ -87,7 +88,7 @@ export class AppComponent {
             name: this.selectedNode.name,
             numberOfKinds: this.selectedNode.numberOfKinds
         };
-        const parentNode: FlatAnimalNode = this.getParent(this.selectedNode);
+        const parentNode: FlatAnimalNode = TreeUtil.getParent(this.treeControl.dataNodes, this.selectedNode);
         this.animalTreeService.deleteNode(nodeToDelete, this.selectedNode.level, parentNode.id)
             .subscribe(() => console.log('Delete successful'), () => console.log('Error after http request'));
         this.action = Action.NONE;
@@ -122,7 +123,7 @@ export class AppComponent {
     }
 
     onFormEditClick(): void {
-        const parentNode: FlatAnimalNode = this.getParent(this.selectedNode);
+        const parentNode: FlatAnimalNode = TreeUtil.getParent(this.treeControl.dataNodes, this.selectedNode);
         this.animalTreeService.editNode(this.actionNode, this.selectedNode.level, parentNode.id)
             .subscribe(() => console.log('Edit successful'), () => console.log('Error after http request'));
         this.action = Action.NONE;
@@ -134,40 +135,24 @@ export class AppComponent {
             || this.isEditAction() && this.isNodeHasKindsOfSpecies(this.selectedNode);
     }
 
-    private getParent(node: FlatAnimalNode): FlatAnimalNode | null {
-        const currentLevel = node.level;
-        if (currentLevel < 1) {
-            return null;
-        }
-        const startIndex = this.treeControl.dataNodes.indexOf(node) - 1;
-        for (let i = startIndex; i >= 0; i--) {
-            const currentNode = this.treeControl.dataNodes[i];
-            if (currentNode.level < currentLevel) {
-                return currentNode;
-            }
-        }
-    }
-
     private subscribeOnEvents(): void {
         this.animalTreeService.subscribeOnEvents(
             message => {
                 const notification: Notification = <Notification> JSON.parse(message.data);
-                console.log(notification);
-                console.log(notification.requestMethod);
                 switch (notification.requestMethod) {
                     case 'POST':
-                        const parent: AnimalNode = this.findNodeByIdAndLevel(notification.parentId, notification.level - 1);
+                        const parent: AnimalNode = TreeUtil.findNodeByIdAndLevel(this.treeData, notification.parentId, notification.level - 1);
                         parent.children.push(notification.result);
                         this.updateTreeData();
                         break;
                     case 'PUT':
-                        const nodeToEdit: AnimalNode = this.findNodeByIdAndLevel(notification.result.id, notification.level);
+                        const nodeToEdit: AnimalNode = TreeUtil.findNodeByIdAndLevel(this.treeData, notification.result.id, notification.level);
                         nodeToEdit.name = notification.result.name;
                         nodeToEdit.numberOfKinds = notification.result.numberOfKinds;
                         this.updateTreeData();
                         break;
                     case 'DELETE':
-                        this.deleteNodeByIdAndLevel(notification.deletedId, notification.level);
+                        TreeUtil.deleteNodeByIdAndLevel(this.treeData, notification.deletedId, notification.level);
                         this.updateTreeData();
                         break;
                     default:
@@ -176,41 +161,6 @@ export class AppComponent {
             },
             () => console.log('Server-sent emitter timeout ended. Refresh page to reconnect.')
         );
-    }
-
-    private findNodeByIdAndLevel(id: number, level: number): AnimalNode {
-        const nodes: AnimalNode[][] = [this.treeData];
-        for (let i = 1; i < 6; i++) {
-            const nodesOnLevel: AnimalNode[] = [];
-            nodes[i - 1].forEach(nodes => {
-                if (nodes.children !== undefined) {
-                    nodes.children.forEach(child => nodesOnLevel.push(child));
-                }
-            });
-            nodes.push(nodesOnLevel);
-        }
-        return nodes[level].find(node => node.id === id);
-    }
-
-    private deleteNodeByIdAndLevel(id: number, level: number): void {
-        const nodes: AnimalNode[][] = [this.treeData];
-        for (let i = 1; i < level; i++) {
-            const nodesOnLevel: AnimalNode[] = [];
-            nodes[i - 1].forEach(nodes => {
-                if (nodes.children !== undefined) {
-                    nodes.children.forEach(child => nodesOnLevel.push(child));
-                }
-            });
-            nodes.push(nodesOnLevel);
-        }
-        for (let node of nodes[level - 1]) {
-            const nodeToDelete: AnimalNode = node.children.find(n => n.id === id);
-            if (nodeToDelete !== undefined) {
-                console.log('Found');
-                node.children.splice(node.children.indexOf(nodeToDelete), 1);
-                break;
-            }
-        }
     }
 
     private updateTreeData(): void {
@@ -231,14 +181,12 @@ export class AppComponent {
     }
 
     private transformer(node: AnimalNode, level: number): FlatAnimalNode {
-        const flatAnimalNode: FlatAnimalNode = {
+        return {
             id: node.id,
             expandable: !!node.children && node.children.length > 0,
             name: node.name,
             level: level,
             numberOfKinds: node.numberOfKinds
         };
-        AppComponent.nodeMap.set(flatAnimalNode, node);
-        return flatAnimalNode;
     }
 }

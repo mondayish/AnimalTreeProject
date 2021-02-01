@@ -10,10 +10,10 @@ import {AnimalNode} from '../models/AnimalNode';
 export class AnimalTreeService {
 
     private static readonly TREE_URL: string =
-        'http://localhost:8080' +
+        // 'http://localhost:8080' +
         '/tree/';
     private static readonly STREAM_URL: string =
-        'http://localhost:8080' +
+        // 'http://localhost:8080' +
         '/tree/root/stream';
     private static readonly NAMES_BY_LEVEL: Map<Level, string> = new Map([
         [Level.ROOT, 'root'],
