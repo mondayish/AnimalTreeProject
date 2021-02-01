@@ -1,6 +1,5 @@
 package ru.mondayish.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,39 +7,38 @@ import ru.mondayish.models.tree.AnimalSquad;
 import ru.mondayish.services.nodes.AnimalNodesDAO;
 
 @RestController
-@RequestMapping("/tree/class/{classId}/squad")
+@RequestMapping("/tree/class/{parentId}/squad")
 public class AnimalSquadController {
 
     private final AnimalNodesDAO<AnimalSquad> squadService;
 
-    @Autowired
     public AnimalSquadController(AnimalNodesDAO<AnimalSquad> squadService) {
         this.squadService = squadService;
     }
 
     @PostMapping
-    public ResponseEntity<AnimalSquad> addAnimalSquad(@PathVariable Long classId, @RequestBody AnimalSquad animalSquad){
+    public ResponseEntity<AnimalSquad> addAnimalSquad(@PathVariable Long parentId, @RequestBody AnimalSquad animalSquad){
         try {
-            return new ResponseEntity<>(squadService.addNode(animalSquad, classId), HttpStatus.OK);
+            return new ResponseEntity<>(squadService.addNode(animalSquad, parentId), HttpStatus.OK);
         } catch (IllegalArgumentException e){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
     @PutMapping
-    public ResponseEntity<HttpStatus> editAnimalSquad(@PathVariable Long classId, @RequestBody AnimalSquad animalSquad){
+    public ResponseEntity<HttpStatus> editAnimalSquad(@PathVariable Long parentId, @RequestBody AnimalSquad animalSquad){
         try {
-            squadService.editNode(animalSquad, classId);
+            squadService.editNode(animalSquad, parentId);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (IllegalArgumentException e){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
-    @DeleteMapping("/{squadId}")
-    public ResponseEntity<HttpStatus> removeAnimalSquad(@PathVariable Long classId, @PathVariable Long squadId){
+    @DeleteMapping("/{nodeId}")
+    public ResponseEntity<HttpStatus> removeAnimalSquad(@PathVariable Long parentId, @PathVariable Long nodeId){
         try {
-            squadService.removeNode(squadId, classId);
+            squadService.removeNode(nodeId, parentId);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (IllegalArgumentException e){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

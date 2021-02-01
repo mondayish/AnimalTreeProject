@@ -1,6 +1,5 @@
 package ru.mondayish.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,39 +7,38 @@ import ru.mondayish.models.tree.AnimalFamily;
 import ru.mondayish.services.nodes.AnimalNodesDAO;
 
 @RestController
-@RequestMapping("/tree/squad/{squadId}/family")
+@RequestMapping("/tree/squad/{parentId}/family")
 public class AnimalFamilyController {
 
     private final AnimalNodesDAO<AnimalFamily> familyService;
 
-    @Autowired
     public AnimalFamilyController(AnimalNodesDAO<AnimalFamily> familyService) {
         this.familyService = familyService;
     }
 
     @PostMapping
-    public ResponseEntity<AnimalFamily> addAnimalFamily(@PathVariable Long squadId, @RequestBody AnimalFamily animalFamily){
+    public ResponseEntity<AnimalFamily> addAnimalFamily(@PathVariable Long parentId, @RequestBody AnimalFamily animalFamily){
         try {
-            return new ResponseEntity<>(familyService.addNode(animalFamily, squadId), HttpStatus.OK);
+            return new ResponseEntity<>(familyService.addNode(animalFamily, parentId), HttpStatus.OK);
         } catch (IllegalArgumentException e){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
     @PutMapping
-    public ResponseEntity<HttpStatus> editAnimalFamily(@PathVariable Long squadId, @RequestBody AnimalFamily animalFamily){
+    public ResponseEntity<HttpStatus> editAnimalFamily(@PathVariable Long parentId, @RequestBody AnimalFamily animalFamily){
         try {
-            familyService.editNode(animalFamily, squadId);
+            familyService.editNode(animalFamily, parentId);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (IllegalArgumentException e){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
-    @DeleteMapping("/{familyId}")
-    public ResponseEntity<HttpStatus> removeAnimalFamily(@PathVariable Long squadId, @PathVariable Long familyId){
+    @DeleteMapping("/{nodeId}")
+    public ResponseEntity<HttpStatus> removeAnimalFamily(@PathVariable Long parentId, @PathVariable Long nodeId){
         try {
-            familyService.removeNode(familyId, squadId);
+            familyService.removeNode(nodeId, parentId);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (IllegalArgumentException e){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

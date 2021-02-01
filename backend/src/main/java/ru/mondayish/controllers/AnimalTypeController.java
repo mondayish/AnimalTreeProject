@@ -1,6 +1,5 @@
 package ru.mondayish.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +12,6 @@ public class AnimalTypeController {
 
     private final AnimalRootDAO<AnimalType> typeService;
 
-    @Autowired
     public AnimalTypeController(AnimalRootDAO<AnimalType> typeService) {
         this.typeService = typeService;
     }
@@ -28,9 +26,9 @@ public class AnimalTypeController {
         return typeService.editNode(animalType) ? new ResponseEntity<>(HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<HttpStatus> removeAnimalType(@PathVariable Long id) {
-        typeService.removeNode(id);
+    @DeleteMapping("/{nodeId}")
+    public ResponseEntity<HttpStatus> removeAnimalType(@PathVariable Long nodeId) {
+        typeService.removeNode(nodeId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

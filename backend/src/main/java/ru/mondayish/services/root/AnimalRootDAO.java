@@ -6,5 +6,5 @@ public interface AnimalRootDAO<T> {
 
     boolean editNode(T node);
 
-    void removeNode(long id);
+    void removeNode(Long id);
 }

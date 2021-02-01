@@ -1,9 +1,10 @@
 import {FlatTreeControl} from '@angular/cdk/tree';
-import {Component} from '@angular/core';
-import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
+import {Component, ViewChild} from '@angular/core';
+import {MatTree, MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import {AnimalNode} from '../models/AnimalNode';
 import {FlatAnimalNode} from '../models/FlatAnimalNode';
 import {Action} from '../models/Action';
+import {Notification} from '../models/Notification';
 import {FormControl, FormGroup, ValidationErrors, Validators} from '@angular/forms';
 import {Level} from '../models/Level';
 import {AnimalTreeService} from '../services/animal-tree.service';
@@ -17,7 +18,11 @@ import {AnimalTreeService} from '../services/animal-tree.service';
 
 export class AppComponent {
 
+    static nodeMap: Map<FlatAnimalNode, AnimalNode> = new Map<FlatAnimalNode, AnimalNode>();
+
+    @ViewChild(MatTree) matTree: MatTree<any>;
     rootTitle: string = 'Animals';
+    treeData: AnimalNode[];
     actionNode: AnimalNode;
     actionForm: FormGroup = new FormGroup({
         name: new FormControl('',
@@ -146,18 +151,78 @@ export class AppComponent {
     private subscribeOnEvents(): void {
         this.animalTreeService.subscribeOnEvents(
             message => {
-                this.dataSource.data = [JSON.parse(message.data)];
-                this.treeControl.expandAll();
+                const notification: Notification = <Notification> JSON.parse(message.data);
+                console.log(notification);
+                console.log(notification.requestMethod);
+                switch (notification.requestMethod) {
+                    case 'POST':
+                        const parent: AnimalNode = this.findNodeByIdAndLevel(notification.parentId, notification.level - 1);
+                        parent.children.push(notification.result);
+                        this.updateTreeData();
+                        break;
+                    case 'PUT':
+                        const nodeToEdit: AnimalNode = this.findNodeByIdAndLevel(notification.result.id, notification.level);
+                        nodeToEdit.name = notification.result.name;
+                        nodeToEdit.numberOfKinds = notification.result.numberOfKinds;
+                        this.updateTreeData();
+                        break;
+                    case 'DELETE':
+                        this.deleteNodeByIdAndLevel(notification.deletedId, notification.level);
+                        this.updateTreeData();
+                        break;
+                    default:
+                        console.log('This http method is not supported now');
+                }
             },
             () => console.log('Server-sent emitter timeout ended. Refresh page to reconnect.')
         );
     }
 
+    private findNodeByIdAndLevel(id: number, level: number): AnimalNode {
+        const nodes: AnimalNode[][] = [this.treeData];
+        for (let i = 1; i < 6; i++) {
+            const nodesOnLevel: AnimalNode[] = [];
+            nodes[i - 1].forEach(nodes => {
+                if (nodes.children !== undefined) {
+                    nodes.children.forEach(child => nodesOnLevel.push(child));
+                }
+            });
+            nodes.push(nodesOnLevel);
+        }
+        return nodes[level].find(node => node.id === id);
+    }
+
+    private deleteNodeByIdAndLevel(id: number, level: number): void {
+        const nodes: AnimalNode[][] = [this.treeData];
+        for (let i = 1; i < level; i++) {
+            const nodesOnLevel: AnimalNode[] = [];
+            nodes[i - 1].forEach(nodes => {
+                if (nodes.children !== undefined) {
+                    nodes.children.forEach(child => nodesOnLevel.push(child));
+                }
+            });
+            nodes.push(nodesOnLevel);
+        }
+        for (let node of nodes[level - 1]) {
+            const nodeToDelete: AnimalNode = node.children.find(n => n.id === id);
+            if (nodeToDelete !== undefined) {
+                console.log('Found');
+                node.children.splice(node.children.indexOf(nodeToDelete), 1);
+                break;
+            }
+        }
+    }
+
+    private updateTreeData(): void {
+        this.dataSource.data = this.treeData;
+        this.treeControl.expandAll();
+    }
+
     private loadTree(): void {
         this.animalTreeService.getTree()
             .subscribe((data: AnimalNode) => {
-                this.dataSource.data = [data];
-                this.treeControl.expandAll();
+                this.treeData = [data];
+                this.updateTreeData();
             });
     }
 
@@ -165,13 +230,15 @@ export class AppComponent {
         this.actionForm.reset();
     }
 
-    private transformer(node: AnimalNode, level: number) {
-        return {
+    private transformer(node: AnimalNode, level: number): FlatAnimalNode {
+        const flatAnimalNode: FlatAnimalNode = {
             id: node.id,
             expandable: !!node.children && node.children.length > 0,
             name: node.name,
             level: level,
             numberOfKinds: node.numberOfKinds
         };
+        AppComponent.nodeMap.set(flatAnimalNode, node);
+        return flatAnimalNode;
     }
 }
