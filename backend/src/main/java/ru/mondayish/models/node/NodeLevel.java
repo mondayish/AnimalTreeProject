@@ -1,4 +1,4 @@
-package ru.mondayish.bpp;
+package ru.mondayish.models.node;
 
 import ru.mondayish.models.tree.*;
 

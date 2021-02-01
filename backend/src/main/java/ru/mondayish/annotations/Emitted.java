@@ -1,6 +1,7 @@
-package ru.mondayish.bpp;
+package ru.mondayish.annotations;
 
 import org.springframework.web.bind.annotation.RequestMethod;
+import ru.mondayish.models.node.NodeLevel;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

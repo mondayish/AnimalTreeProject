@@ -3,7 +3,7 @@ package ru.mondayish.services.notifications;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import ru.mondayish.bpp.Notification;
+import ru.mondayish.models.Notification;
 
 import java.io.IOException;
 import java.util.ArrayList;
