@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import ru.mondayish.models.tree.AnimalRoot;
-import ru.mondayish.services.notifications.NotificationService;
+import ru.mondayish.utils.NotificationUtil;
 import ru.mondayish.services.root.AnimalRootService;
 
 @RestController
@@ -28,8 +28,8 @@ public class TreeRootController {
     @GetMapping("/stream")
     public SseEmitter getStream() {
         SseEmitter sseEmitter = new SseEmitter(-1L);
-        NotificationService.emitters.add(sseEmitter);
-        sseEmitter.onCompletion(() -> NotificationService.emitters.remove(sseEmitter));
+        NotificationUtil.emitters.add(sseEmitter);
+        sseEmitter.onCompletion(() -> NotificationUtil.emitters.remove(sseEmitter));
         return sseEmitter;
     }
 }
